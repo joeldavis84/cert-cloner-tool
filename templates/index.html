@@ -10,7 +10,9 @@
         .config-table td { padding: 10px; border: 1px solid #ddd; font-family: monospace; }
         .label { font-weight: bold; width: 30%; }
         input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; background: #007bff; width: 100%; font-weight: bold; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; background: #007bff; width: 100%; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box;}
+        .btn-download { background: #28a745; margin-bottom: 20px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
     </style>
 </head>
 <body>
@@ -29,10 +31,19 @@
             {% endfor %}
         </table>
 
+        <hr>
+
+        <h2>Trust Assets</h2>
+        <p>Download the Root CA used by this server. Import this into your browser or OS trust store to validate signed certs.</p>
+        <a href="/download-ca" class="btn btn-download">Download ad hoc root CA cert</a>
+
+        <hr>
+
         <h2>Sign New Certificate</h2>
         <form action="/sign" method="post">
             <input type="text" name="common_name" placeholder="Enter Common Name (CN)" required>
-            <button type="submit" class="btn">Sign & Download</button>
+            <p><small>Note: You will receive a ZIP file containing the <strong>.crt</strong> and the <strong>unencrypted .key</strong> file.</small></p>
+            <button type="submit" class="btn">Generate, Sign & Download ZIP</button>
         </form>
     </div>
 </body>

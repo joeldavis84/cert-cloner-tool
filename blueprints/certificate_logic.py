@@ -1,4 +1,6 @@
 import os
+import io
+import zipfile
 import datetime
 from flask import Blueprint, render_template, request, current_app, send_file
 from cryptography import x509
@@ -14,31 +16,45 @@ def index():
     effective_config = {k: current_app.config.get(k) for k in config_keys}
     return render_template('index.html', config=effective_config)
 
+@cert_bp.route('/download-ca')
+def download_ca():
+    ca_dir = current_app.config['TARGET_DIR']
+    cert_path = os.path.join(ca_dir, "cert.pem")
+    
+    if os.path.exists(cert_path):
+        return send_file(
+            cert_path, 
+            as_attachment=True, 
+            download_name="adhoc-root-ca.pem"
+        )
+    return "Root CA file not found.", 404
+
 @cert_bp.route('/sign', methods=['POST'])
 def sign_certificate():
     cn = request.form.get('common_name')
     ca_dir = current_app.config['TARGET_DIR']
     
-    # Paths to the files synced during startup
     cert_path = os.path.join(ca_dir, "cert.pem")
     key_path = os.path.join(ca_dir, "key.pem")
 
+    # Load CA Assets
     with open(cert_path, "rb") as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
     with open(key_path, "rb") as f:
         ca_key = serialization.load_pem_private_key(f.read(), password=None)
 
-    # Generate new keypair for the user
+    # Generate User Keypair (Unencrypted PEM)
     user_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    
-    # Define the Subject Name (CN)
+    user_key_pem = user_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption() # Unencrypted
+    )
+
+    # Generate Certificate with SAN
     subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, cn)])
-    
-    # Define the Subject Alternative Name (SAN)
-    # This adds the CN as a DNS name entry
     san = x509.SubjectAlternativeName([x509.DNSName(cn)])
 
-    # Build the certificate
     cert = x509.CertificateBuilder().subject_name(
         subject
     ).issuer_name(
@@ -52,11 +68,22 @@ def sign_certificate():
     ).not_valid_after(
         datetime.datetime.utcnow() + datetime.timedelta(days=365)
     ).add_extension(
-        san, critical=False  # SAN is added here
+        san, critical=False
     ).sign(ca_key, hashes.SHA256())
 
-    output_path = f"/tmp/{cn}.crt"
-    with open(output_path, "wb") as f:
-        f.write(cert.public_bytes(serialization.Encoding.PEM))
-        
-    return send_file(output_path, as_attachment=True)
+    cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+
+    # Create ZIP in memory
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        zf.writestr(f"{cn}.crt", cert_pem)
+        zf.writestr(f"{cn}.key", user_key_pem)
+    
+    memory_file.seek(0)
+    
+    return send_file(
+        memory_file,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=f"{cn}_assets.zip"
+    )
