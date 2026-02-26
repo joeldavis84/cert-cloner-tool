@@ -1,5 +1,5 @@
 git_config:
-  repo_url: "https://github.com/example-user/pki-repo.git"
+  repo_url: "https://github.com/joeldavis84/tmp-ca-stuff.git"
   files_to_clone:
     - "cert.pem"
     - "key.pem"

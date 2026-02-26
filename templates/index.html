@@ -5,17 +5,20 @@
     <style>
         body { font-family: sans-serif; background: #f9f9f9; padding: 40px; }
         .card { background: white; max-width: 800px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .restart-banner { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-weight: bold; text-align: center; }
         .config-table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #eee; border-radius: 4px; }
         .config-table td { padding: 10px; border: 1px solid #ddd; font-family: monospace; }
         .label { font-weight: bold; width: 30%; }
         input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; }
-        .primary { background: #007bff; }
-        .secondary { background: #6c757d; margin-top: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; background: #007bff; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="card">
+        <div class="restart-banner">
+            Notice: Application restart is required to pick up any configuration changes or any new CA data from git.
+        </div>
+
         <h2>Effective Configuration</h2>
         <table class="config-table">
             {% for key, value in config.items() %}
@@ -29,11 +32,7 @@
         <h2>Sign New Certificate</h2>
         <form action="/sign" method="post">
             <input type="text" name="common_name" placeholder="Enter Common Name (CN)" required>
-            <button type="submit" class="btn primary">Sign & Download</button>
-        </form>
-
-        <form action="/sync" method="post">
-            <button type="submit" class="btn secondary">Sync CA Files from Git</button>
+            <button type="submit" class="btn">Sign & Download</button>
         </form>
     </div>
 </body>
