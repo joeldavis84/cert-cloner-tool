@@ -1,0 +1,6 @@
+git_config:
+  repo_url: "https://github.com/example-user/pki-repo.git"
+  files_to_clone:
+    - "cert.pem"
+    - "key.pem"
+  target_dir: "./ca_keys"

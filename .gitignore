@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# App Specific
+temp_git/
+ca_keys/
+*.crt
+*.pem
+!config.yaml
+
+# OS
+.DS_Store
+Thumbs.db
