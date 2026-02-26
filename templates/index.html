@@ -9,9 +9,11 @@
         .config-table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #eee; border-radius: 4px; }
         .config-table td { padding: 10px; border: 1px solid #ddd; font-family: monospace; }
         .label { font-weight: bold; width: 30%; }
-        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; background: #007bff; width: 100%; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box;}
+        input[type="text"] { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; color: white; background: #007bff; width: 100%; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; margin-top: 10px;}
+        .btn-add { background: #6c757d; width: auto; font-size: 0.8em; margin-bottom: 10px; }
         .btn-download { background: #28a745; margin-bottom: 20px; }
+        .san-container { margin-bottom: 15px; border-left: 3px solid #007bff; padding-left: 15px; }
         hr { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
     </style>
 </head>
@@ -34,17 +36,38 @@
         <hr>
 
         <h2>Trust Assets</h2>
-        <p>Download the Root CA used by this server. Import this into your browser or OS trust store to validate signed certs.</p>
         <a href="/download-ca" class="btn btn-download">Download ad hoc root CA cert</a>
 
         <hr>
 
         <h2>Sign New Certificate</h2>
         <form action="/sign" method="post">
-            <input type="text" name="common_name" placeholder="Enter Common Name (CN)" required>
-            <p><small>Note: You will receive a ZIP file containing the <strong>.crt</strong> and the <strong>unencrypted .key</strong> file.</small></p>
-            <button type="submit" class="btn">Generate, Sign & Download ZIP</button>
+            <label><strong>Common Name (CN):</strong></label>
+            <input type="text" name="common_name" placeholder="e.g. myservice.local" required>
+            
+            <div id="san-wrapper" class="san-container">
+                <label><strong>Additional SANs (DNS names):</strong></label>
+                <div class="san-input-group">
+                    <input type="text" name="sans[]" placeholder="e.g. alt-name.local">
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-add" onclick="addSanField()">+ Add Another SAN</button>
+            
+            <p><small>Note: The CN is automatically included as a SAN.</small></p>
+            <button type="submit" class="btn">Generate & Sign Assets (.zip)</button>
         </form>
     </div>
+
+    <script>
+        function addSanField() {
+            const wrapper = document.getElementById('san-wrapper');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'sans[]';
+            input.placeholder = 'Additional SAN...';
+            wrapper.appendChild(input);
+        }
+    </script>
 </body>
 </html>
